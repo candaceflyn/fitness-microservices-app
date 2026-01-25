@@ -1,0 +1,303 @@
+{
+  "info": {
+    "_postman_id": "f02f276b-4cfd-4d46-a57a-6673fa2a97fc",
+    "name": "Fitness Microservice",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49505044",
+    "_collection_link": "https://go.postman.co/collection/49505044-f02f276b-4cfd-4d46-a57a-6673fa2a97fc?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "User Services",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"john.doe@gmail.com\",\r\n    \"password\": \"John@123\",\r\n    \"firstName\": \"John\",\r\n    \"lastName\": \"Doe\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/users/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "users",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"john.doe@gmail.com\",\r\n    \"password\": \"John@123\",\r\n    \"firstName\": \"John\",\r\n    \"lastName\": \"Doe\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/users/05f43fed-472b-41e8-8a2e-90efc06c4b1d",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "users",
+                "05f43fed-472b-41e8-8a2e-90efc06c4b1d"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validate User",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"john.doe@gmail.com\",\r\n    \"password\": \"John@123\",\r\n    \"firstName\": \"John\",\r\n    \"lastName\": \"Doe\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/users/05f43fed-472b-41e8-8a2e-90efc06c4b1d/validate",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "api",
+                "users",
+                "05f43fed-472b-41e8-8a2e-90efc06c4b1d",
+                "validate"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Activity Services",
+      "item": [
+        {
+          "name": "Register Activity",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userId\": \"05f43fed-472b-41e8-8a2e-90efc06c4b1d\",\r\n    \"activityType\": \"RUNNING\",\r\n    \"duration\": 30,\r\n    \"caloriesBurned\": 9000,\r\n    \"startTime\": \"2025-12-12T10:00:00\",\r\n    \"additionalMetrics\": {\r\n        \"distance\": 1.2,\r\n        \"averageSpeed\": 2.4,\r\n        \"maxHeartRate\": 190\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/activities",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8082",
+              "path": [
+                "api",
+                "activities"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Activity List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-ID",
+                "value": "05f43fed-472b-41e8-8a2e-90efc06c4b1d",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8082/api/activities",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8082",
+              "path": [
+                "api",
+                "activities"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Activity by Id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"john.doe@gmail.com\",\r\n    \"password\": \"John@123\",\r\n    \"firstName\": \"John\",\r\n    \"lastName\": \"Doe\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/activities/696ce63ca9526780c8690b8b",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8082",
+              "path": [
+                "api",
+                "activities",
+                "696ce63ca9526780c8690b8b"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recommendations",
+      "item": [
+        {
+          "name": "Get User Recommendations",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userId\": \"105f43fed-472b-41e8-8a2e-90efc06c4b1d\"\",\r\n    \"activityType\": \"WALKING\",\r\n    \"duration\": 70,\r\n    \"caloriesBurned\": 9000,\r\n    \"startTime\": \"2025-12-12T10:00:00\",\r\n    \"additionalMetrics\": {\r\n        \"distance\": 3.2,\r\n        \"averageSpeed\": 6.4,\r\n        \"maxHeartRate\": 190\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/recommendations/user/05f43fed-472b-41e8-8a2e-90efc06c4b1d",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "recommendations",
+                "user",
+                "05f43fed-472b-41e8-8a2e-90efc06c4b1d"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Activity Recommendations",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userId\": \"105f43fed-472b-41e8-8a2e-90efc06c4b1d\"\",\r\n    \"activityType\": \"WALKING\",\r\n    \"duration\": 70,\r\n    \"caloriesBurned\": 9000,\r\n    \"startTime\": \"2025-12-12T10:00:00\",\r\n    \"additionalMetrics\": {\r\n        \"distance\": 3.2,\r\n        \"averageSpeed\": 6.4,\r\n        \"maxHeartRate\": 190\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/api/recommendations/activity/6975c5a287b4cb29590d3971",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "api",
+                "recommendations",
+                "activity",
+                "6975c5a287b4cb29590d3971"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
