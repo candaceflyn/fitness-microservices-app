@@ -276,6 +276,46 @@
       ]
     }
   ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "clientId",
+        "value": "oauth2-pkce-client",
+        "type": "string"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "http://localhost:8181/realms/fitness-oauth2/protocol/openid-connect/token",
+        "type": "string"
+      },
+      {
+        "key": "authUrl",
+        "value": "http://localhost:8181/realms/fitness-oauth2/protocol/openid-connect/auth",
+        "type": "string"
+      },
+      {
+        "key": "redirect_uri",
+        "value": "http://localhost:5173",
+        "type": "string"
+      },
+      {
+        "key": "grant_type",
+        "value": "authorization_code_with_pkce",
+        "type": "string"
+      },
+      {
+        "key": "tokenName",
+        "value": "fitness-app-token",
+        "type": "string"
+      },
+      {
+        "key": "addTokenTo",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
   "event": [
     {
       "listen": "prerequest",

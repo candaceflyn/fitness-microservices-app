@@ -22,8 +22,8 @@ This project demonstrates:
                  └───────┬────────┘
                          │
                  ┌───────▼────────┐
-                 │    Eureka       │
-                 │   Server :8761  │
+                 │    Eureka      │
+                 │   Server :8761 │
                  └───────┬────────┘
                          │
         ┌────────────────┼────────────────┐
@@ -53,7 +53,8 @@ This project demonstrates:
 * **Spring Data JPA**
 * **Spring Data MongoDB**
 * **RabbitMQ**
-* **Lombok**
+* **Spring Security (OAuth 2.0 Resource Server)**
+* **Keycloak (OIDC Provider, JWT-based auth)**
 
 ### Databases
 
@@ -67,6 +68,189 @@ This project demonstrates:
 ### AI Integration
 
 * **Google Gemini API** (via environment variables)
+
+---
+
+## 🔐 Authentication & Authorization (Keycloak)
+
+This platform uses **Keycloak** as the **OAuth 2.0 / OpenID Connect (OIDC) provider**.
+All external API access is secured using **JWT-based authentication**, enforced at the **API Gateway**.
+
+---
+
+### 🧱 Keycloak Setup
+
+Keycloak can be run locally either by installing it on the host or using Docker.
+
+#### ▶️ Run Keycloak using Docker (Recommended)
+
+```bash
+docker run -p 127.0.0.1:8181:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:26.5.2 start-dev
+```
+
+Access Keycloak Admin Console:
+
+```
+http://localhost:8181
+```
+
+**Admin Credentials:**
+
+```
+Username: admin
+Password: admin
+```
+
+---
+
+### 🌍 Realm Configuration
+
+1. Create a new realm:
+
+   ```
+   Realm Name: fitness-oauth2
+   ```
+2. Ensure **Realm Enabled** is ON
+
+---
+
+### 🧩 Client Configuration (PKCE-based Client)
+
+Create a new client under the `fitness-oauth2` realm:
+
+| Setting               | Value               |
+| --------------------- | ------------------- |
+| Client Type           | OpenID Connect      |
+| Client ID             | oauth2-pkce-client  |
+| Client Authentication | OFF (Public Client) |
+
+#### Authentication Flow
+
+Enable:
+
+* ✅ Standard Flow
+* ✅ Direct Access Grants
+
+#### Redirect & Origin Configuration
+
+```text
+Valid Redirect URI:
+http://localhost:5173
+
+Web Origins:
+http://localhost:5173
+```
+
+Save the client.
+
+---
+
+### 🔐 PKCE Configuration
+
+Go to:
+
+```
+Client → Settings → Capability Config
+```
+
+Set:
+
+```
+Proof Key for Code Exchange (PKCE): S256
+```
+
+Save changes.
+
+---
+
+### 🔎 OpenID Configuration & Issuer
+
+From:
+
+```
+Realm Settings → General → Endpoints → OpenID Endpoint Configuration
+```
+
+This opens:
+
+```
+http://localhost:8181/realms/fitness-oauth2/.well-known/openid-configuration
+```
+
+Extract the **issuer URI**:
+
+```
+http://localhost:8181/realms/fitness-oauth2
+```
+
+---
+
+### ⚙️ API Gateway Security Configuration
+
+The API Gateway acts as an **OAuth 2.0 Resource Server** and validates JWTs issued by Keycloak.
+
+`bootstrap.yml` (Gateway):
+
+```yaml
+spring:
+  application:
+    name: api-gateway
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8181/realms/fitness-oauth2
+```
+
+> Security configuration is loaded at **bootstrap time** to ensure JWT validation is available before application startup.
+
+---
+
+### 👤 User Setup in Keycloak
+
+1. Go to **Users → Create User**
+2. Set username and save
+3. Go to **Credentials**
+4. Set password
+5. Disable **Temporary**
+6. Save
+
+---
+
+### 🧪 Testing Authentication via Postman (PKCE Flow)
+
+1. Open Postman
+2. Go to **Collection → Authorization**
+3. Select **OAuth 2.0**
+4. Configure token:
+
+| Field                 | Value                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Token Name            | fitness-app-token                                                                                                                                      |
+| Grant Type            | Authorization Code (with PKCE)                                                                                                                         |
+| Callback URL          | [http://localhost:5173](http://localhost:5173)                                                                                                         |
+| Auth URL              | [http://localhost:8181/realms/fitness-oauth2/protocol/openid-connect/auth](http://localhost:8181/realms/fitness-oauth2/protocol/openid-connect/auth)   |
+| Access Token URL      | [http://localhost:8181/realms/fitness-oauth2/protocol/openid-connect/token](http://localhost:8181/realms/fitness-oauth2/protocol/openid-connect/token) |
+| Client ID             | oauth2-pkce-client                                                                                                                                     |
+| Code Challenge Method | SHA-256                                                                                                                                                |
+
+5. Click **Get New Access Token**
+6. Login with the Keycloak user credentials
+7. Click **Use Token**
+
+All subsequent API calls will include the `Authorization: Bearer <token>` header.
+
+🔁 When the token expires, click **Refresh Token** in Postman to obtain a new access token without re-authentication.
+
+---
+
+### 🔒 Security Behavior
+
+* ✅ All API endpoints are **secured by default**
+* ❌ Requests without a valid JWT return **401 Unauthorized**
+* ✅ Token validation is enforced at the **API Gateway**
+* ✅ Downstream services are accessed only via the Gateway
 
 ---
 
@@ -88,6 +272,7 @@ This project demonstrates:
 * Single entry point for all APIs
 * Load-balanced routing via Eureka
 * No direct service port exposure
+* OAuth 2.0 Resource Server using Keycloak (JWT validation)
 
 #### Configured Routes
 
@@ -264,13 +449,14 @@ GEMINI_API_KEY=YOUR_GEMINI_KEY
 
 ## 🚀 Startup Order (STRICT)
 
-1️⃣ RabbitMQ
-2️⃣ Eureka Server
-3️⃣ Config Server
-4️⃣ User Service
-5️⃣ Activity Service
-6️⃣ AI Service
-7️⃣ API Gateway
+1️⃣ Keycloak  
+2️⃣ RabbitMQ  
+3️⃣ Eureka Server  
+4️⃣ Config Server  
+5️⃣ User Service  
+6️⃣ Activity Service  
+7️⃣ AI Service  
+8️⃣ API Gateway  
 
 ---
 
