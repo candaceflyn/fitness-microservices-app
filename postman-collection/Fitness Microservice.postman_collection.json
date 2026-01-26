@@ -25,12 +25,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8081/api/users/register",
+              "raw": "http://localhost:8080/api/users/register",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "8081",
+              "port": "8080",
               "path": [
                 "api",
                 "users",
@@ -58,12 +58,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8081/api/users/05f43fed-472b-41e8-8a2e-90efc06c4b1d",
+              "raw": "http://localhost:8080/api/users/05f43fed-472b-41e8-8a2e-90efc06c4b1d",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "8081",
+              "port": "8080",
               "path": [
                 "api",
                 "users",
@@ -91,12 +91,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8081/api/users/05f43fed-472b-41e8-8a2e-90efc06c4b1d/validate",
+              "raw": "http://localhost:8080/api/users/05f43fed-472b-41e8-8a2e-90efc06c4b1d/validate",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "8081",
+              "port": "8080",
               "path": [
                 "api",
                 "users",
@@ -119,7 +119,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"userId\": \"05f43fed-472b-41e8-8a2e-90efc06c4b1d\",\r\n    \"activityType\": \"RUNNING\",\r\n    \"duration\": 30,\r\n    \"caloriesBurned\": 9000,\r\n    \"startTime\": \"2025-12-12T10:00:00\",\r\n    \"additionalMetrics\": {\r\n        \"distance\": 1.2,\r\n        \"averageSpeed\": 2.4,\r\n        \"maxHeartRate\": 190\r\n    }\r\n}",
+              "raw": "{\r\n    \"userId\": \"05f43fed-472b-41e8-8a2e-90efc06c4b1d\",\r\n    \"activityType\": \"RUNNING\",\r\n    \"duration\": 30,\r\n    \"caloriesBurned\": 250,\r\n    \"startTime\": \"2025-12-12T10:00:00\",\r\n    \"additionalMetrics\": {\r\n        \"distance\": \"5km\",\r\n        \"averageSpeed\": \"10km/h\",\r\n        \"maxHeartRate\": 190\r\n    }\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -127,12 +127,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8082/api/activities",
+              "raw": "http://localhost:8080/api/activities",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "8082",
+              "port": "8080",
               "path": [
                 "api",
                 "activities"
@@ -153,12 +153,12 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8082/api/activities",
+              "raw": "http://localhost:8080/api/activities",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "8082",
+              "port": "8080",
               "path": [
                 "api",
                 "activities"
@@ -185,12 +185,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8082/api/activities/696ce63ca9526780c8690b8b",
+              "raw": "http://localhost:8080/api/activities/696ce63ca9526780c8690b8b",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "8082",
+              "port": "8080",
               "path": [
                 "api",
                 "activities",
@@ -223,12 +223,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8083/api/recommendations/user/05f43fed-472b-41e8-8a2e-90efc06c4b1d",
+              "raw": "http://localhost:8080/api/recommendations/user/05f43fed-472b-41e8-8a2e-90efc06c4b1d",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "8083",
+              "port": "8080",
               "path": [
                 "api",
                 "recommendations",
@@ -257,12 +257,12 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8083/api/recommendations/activity/6975c5a287b4cb29590d3971",
+              "raw": "http://localhost:8080/api/recommendations/activity/6975c5a287b4cb29590d3971",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
-              "port": "8083",
+              "port": "8080",
               "path": [
                 "api",
                 "recommendations",

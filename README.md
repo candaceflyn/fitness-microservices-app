@@ -5,38 +5,37 @@ A **Spring Boot–based microservices architecture** for tracking user fitness a
 This project demonstrates:
 
 * Service discovery with **Eureka**
+* Edge routing using **Spring Cloud API Gateway**
+* Centralized configuration via **Spring Cloud Config (client enabled)**
 * Asynchronous communication using **RabbitMQ**
 * Polyglot persistence (**PostgreSQL + MongoDB**)
-* Inter-service communication using **WebClient**
-* Clean separation of concerns using microservices
-
-> ⚠️ **Note:** Spring Cloud Config Server is **not yet introduced** at this stage.
+* AI integration using **Google Gemini API**
 
 ---
 
 ## 🧩 Architecture Overview
 
 ```
-┌──────────────┐
-│   Eureka     │
-│  Server      │
-│   :8761      │
-└──────┬───────┘
-       │ Service Discovery
- ┌─────┴─────┐
- │           │
- │           │
-┌▼────────┐ ┌▼─────────┐
-│ User     │ │ Activity │
-│ Service  │ │ Service  │
-│ :8081    │ │ :8082    │
-└──────────┘ └────┬─────┘
-                   │ RabbitMQ Event
-                   ▼
-             ┌───────────┐
-             │ AI Service │
-             │ :8083     │
-             └───────────┘
+                 ┌────────────────┐
+                 │  API GATEWAY   │
+                 │     :8080      │
+                 └───────┬────────┘
+                         │
+                 ┌───────▼────────┐
+                 │    Eureka       │
+                 │   Server :8761  │
+                 └───────┬────────┘
+                         │
+        ┌────────────────┼────────────────┐
+        │                │                │
+┌───────▼───────┐ ┌──────▼────────┐ ┌─────▼──────┐
+│ User Service  │ │ Activity Serv │ │ AI Service │
+│     :8081     │ │     :8082     │ │   :8083    │
+└───────────────┘ └──────┬────────┘ └────────────┘
+                           │
+                     RabbitMQ Event
+                           ▼
+                   AI Recommendation
 ```
 
 ---
@@ -46,11 +45,13 @@ This project demonstrates:
 ### Backend
 
 * **Java 21**
-* **Spring Boot**
+* **Spring Boot 4**
 * **Spring Web / WebFlux**
+* **Spring Cloud Netflix Eureka**
+* **Spring Cloud Gateway**
+* **Spring Cloud Config (Client)**
 * **Spring Data JPA**
 * **Spring Data MongoDB**
-* **Spring Cloud Netflix Eureka**
 * **RabbitMQ**
 * **Lombok**
 
@@ -76,127 +77,76 @@ This project demonstrates:
 **Port:** `8761`
 
 * Central service registry
-* All services register themselves here
-
-```yaml
-spring:
-  application:
-    name: eureka
-```
+* All services register here
 
 ---
 
-### 2️⃣ User Service
+### 2️⃣ API Gateway (Edge Service)
+
+**Port:** `8080`
+
+* Single entry point for all APIs
+* Load-balanced routing via Eureka
+* No direct service port exposure
+
+#### Configured Routes
+
+| Service          | Path                      |
+| ---------------- | ------------------------- |
+| User Service     | `/api/users/**`           |
+| Activity Service | `/api/activities/**`      |
+| AI Service       | `/api/recommendations/**` |
+
+#### Verification
+
+```http
+GET http://localhost:8080/actuator/gateway/routes
+```
+
+You **must** see:
+
+* `user-service`
+* `activity-service`
+* `ai-service`
+
+---
+
+### 3️⃣ User Service
 
 **Port:** `8081`
 **Database:** PostgreSQL
 
-#### Responsibilities
+#### APIs
 
-* User registration
-* Fetch user profile
-* Validate user existence (used by other services)
-
-#### Key APIs
-
-| Method | Endpoint                       | Description             |
-| ------ | ------------------------------ | ----------------------- |
-| POST   | `/api/users/register`          | Register new user       |
-| GET    | `/api/users/{userId}`          | Get user profile        |
-| GET    | `/api/users/{userId}/validate` | Validate user existence |
+| Method | Endpoint                       |
+| ------ | ------------------------------ |
+| POST   | `/api/users/register`          |
+| GET    | `/api/users/{userId}`          |
+| GET    | `/api/users/{userId}/validate` |
 
 ---
 
-### 3️⃣ Activity Service
+### 4️⃣ Activity Service
 
 **Port:** `8082`
 **Database:** MongoDB
-**Messaging:** Publishes events to RabbitMQ
+**Messaging:** RabbitMQ producer
 
-#### Responsibilities
-
-* Track user activities
-* Store activity metrics
-* Publish activity events for AI processing
-* Communicate with User Service via Eureka + WebClient
-
-#### Activity Types Supported
-
-```
-WALKING, RUNNING, CYCLING, SWIMMING,
-WEIGHT_TRAINING, YOGA, HIIT,
-CARDIO, STRETCHING, OTHER
-```
-
-#### Key APIs
-
-| Method | Endpoint               | Description         |
-| ------ | ---------------------- | ------------------- |
-| POST   | `/api/activities`      | Track activity      |
-| GET    | `/api/activities`      | Get user activities |
-| GET    | `/api/activities/{id}` | Get activity by ID  |
-
-> Requires header: `X-User-ID`
+* Tracks activities
+* Publishes activity events
+* Communicates with User Service via Eureka
 
 ---
 
-### 4️⃣ AI Service
+### 5️⃣ AI Service
 
 **Port:** `8083`
 **Database:** MongoDB
-**Messaging:** Consumes RabbitMQ events
+**Messaging:** RabbitMQ consumer
 
-#### Responsibilities
-
-* Consume activity events
-* Generate AI-powered recommendations
-* Store recommendations
-* Expose recommendation APIs
-
-#### Key APIs
-
-| Method | Endpoint                                     | Description             |
-| ------ | -------------------------------------------- | ----------------------- |
-| GET    | `/api/recommendations/user/{userId}`         | User recommendations    |
-| GET    | `/api/recommendations/activity/{activityId}` | Activity recommendation |
-
----
-
-## 🐰 RabbitMQ Configuration
-
-### Exchange
-
-```
-fitness.exchange
-```
-
-### Queue
-
-```
-activity.queue
-```
-
-### Routing Key
-
-```
-activity.tracking
-```
-
-### Docker Command (Recommended)
-
-```bash
-docker run -it --rm --name rabbitmq \
--p 5672:5672 -p 15672:15672 \
-rabbitmq:4-management
-```
-
-RabbitMQ UI:
-👉 [http://localhost:15672](http://localhost:15672)
-**Username:** guest
-**Password:** guest
-
-> Docker Desktop must be installed.
-> If not, install RabbitMQ directly on host.
+* Consumes activity events
+* Generates AI recommendations
+* Stores and exposes results
 
 ---
 
@@ -236,26 +186,91 @@ password: postgres
 
 ---
 
-## 🔑 Environment Variables (AI Service)
+## 🐰 RabbitMQ Configuration
 
-Set the following in your IDE or system:
+### Exchange
+
+```
+fitness.exchange
+```
+
+### Queue
+
+```
+activity.queue
+```
+
+### Routing Key
+
+```
+activity.tracking
+```
+
+### Docker Command (Recommended)
 
 ```bash
-GEMINI_API_URL=your_gemini_api_url
-GEMINI_API_KEY=your_gemini_api_key
+docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4-management
+```
+
+RabbitMQ UI:
+👉 [http://localhost:15672](http://localhost:15672)
+**Username:** guest
+**Password:** guest
+
+> Docker Desktop must be installed.
+> If not, install RabbitMQ directly on host.
+
+---
+
+## 🔑 Gemini API Setup (IMPORTANT)
+
+### 1️⃣ Generate API Key
+
+👉 [https://aistudio.google.com/api-keys](https://aistudio.google.com/api-keys)
+
+### 2️⃣ Test via CURL / Postman
+
+```bash
+curl "YOUR_GEMINI_URL" \
+  -H "Content-Type: application/json" \
+  -H "X-goog-api-key: YOUR_GEMINI_KEY" \
+  -X POST \
+  -d '{
+    "contents": [
+      {
+        "parts": [
+          { "text": "Explain how AI works in a few words" }
+        ]
+      }
+    ]
+  }'
+```
+
+### 3️⃣ Configure in IntelliJ (AI Service)
+
+```
+Edit Configurations →
+AI Service →
+Modify Options →
+Environment Variables
+```
+
+```env
+GEMINI_API_URL=https://generativelanguage.googleapis.com/...?key=
+GEMINI_API_KEY=YOUR_GEMINI_KEY
 ```
 
 ---
 
-## 🚀 How to Run (Order Matters)
+## 🚀 Startup Order (STRICT)
 
-1️⃣ Start **RabbitMQ**
-2️⃣ Start **MongoDB**
-3️⃣ Start **PostgreSQL**
-4️⃣ Start **Eureka Server**
-5️⃣ Start **User Service**
-6️⃣ Start **Activity Service**
-7️⃣ Start **AI Service**
+1️⃣ RabbitMQ
+2️⃣ Eureka Server
+3️⃣ Config Server
+4️⃣ User Service
+5️⃣ Activity Service
+6️⃣ AI Service
+7️⃣ API Gateway
 
 ---
 
@@ -307,17 +322,16 @@ X-User-ID: <USER_ID>
 
 ---
 
-## 📌 Current Status
+## 🌐 Access APIs (via Gateway ONLY)
 
-✅ Service Discovery
-✅ User Management
-✅ Activity Tracking
-✅ Event-driven AI Integration
-✅ RabbitMQ Messaging
-⏳ Spring Cloud Config Server (Upcoming)
+```http
+http://localhost:8080/api/users/...
+http://localhost:8080/api/activities/...
+http://localhost:8080/api/recommendations/...
+```
 
 ---
 
 ## 👨‍💻 Author
 
-Built as part of a **microservices learning journey** using Spring Boot, Cloud, Messaging, and AI integration.
+Built as part of a **hands-on microservices learning journey**, focusing on **real-world architecture**, messaging, and AI integration.
