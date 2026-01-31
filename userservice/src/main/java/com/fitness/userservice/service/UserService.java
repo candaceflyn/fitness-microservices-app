@@ -40,8 +40,26 @@ public class UserService {
 
     public UserResponse register(@Valid RegisterRequest request) {
 
-        if(userRepository.existsByEmail(request.getEmail())){
+        if (userRepository.existsByEmail(request.getEmail())) {
             User existingUser = userRepository.findByEmail(request.getEmail());
+            log.warn(
+                    "[USER-SERVICE][REGISTER] Email exists but keycloakId differs | email={} | existingKeycloakId={}",
+                    request.getEmail(),
+                    existingUser.getKeycloakId()
+            );
+
+            // SYNC KEYCLOAK ID
+            if (!request.getKeycloakId().equals(existingUser.getKeycloakId())) {
+                log.warn(
+                        "[USER-SERVICE][SYNC] Updating keycloakId | email={} | old={} | new={}",
+                        existingUser.getEmail(),
+                        existingUser.getKeycloakId(),
+                        request.getKeycloakId()
+                );
+                existingUser.setKeycloakId(request.getKeycloakId());
+                userRepository.save(existingUser);
+            }
+
             return getUserResponse(existingUser);
         }
 
@@ -57,7 +75,10 @@ public class UserService {
     }
 
     public Boolean existsByUserId(String userId) {
-        log.info("Calling User Validation API for userId: {}", userId);
+        log.info(
+                "[USER-SERVICE][VALIDATE] Checking existence by keycloakId={}",
+                userId
+        );
         return userRepository.existsByKeycloakId(userId);
     }
 }

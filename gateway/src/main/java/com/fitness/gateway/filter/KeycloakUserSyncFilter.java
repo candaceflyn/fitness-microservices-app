@@ -27,15 +27,26 @@ public class KeycloakUserSyncFilter implements WebFilter {
         RegisterRequest registerRequest = getUserDetails(token);
 
         if(userId==null){
-            userId = registerRequest.getKeycloakId();
+            userId = registerRequest != null ? registerRequest.getKeycloakId() : null;
         }
+        log.info(
+                "[GATEWAY][AUTH] Validating user | keycloakId={} | email={}",
+                userId,
+                registerRequest != null ? registerRequest.getEmail() : null
+        );
+
         if(userId!=null && token!=null){
             String finalUserId = userId;
             return userService.validateUser(userId)
                     .flatMap(exist -> {
                         if(!exist){
-                            log.info("User does not exist, registration flow pending.");
                             //Register User
+                            log.warn(
+                                    "[GATEWAY][AUTH] Registering new user | keycloakId={} | email={}",
+                                    registerRequest != null ? registerRequest.getKeycloakId() : null,
+                                    registerRequest != null ? registerRequest.getEmail() : null
+                            );
+
                             if(registerRequest!=null){
                                 return userService.registerUser(registerRequest)
                                         .then(Mono.empty());
@@ -43,7 +54,11 @@ public class KeycloakUserSyncFilter implements WebFilter {
                                 return Mono.empty();
                             }
                         } else {
-                            log.info("User already exists, Skipping sync.");
+                            log.info(
+                                    "[GATEWAY][AUTH] User exists | keycloakId={} | email={}",
+                                    finalUserId,
+                                    registerRequest != null ? registerRequest.getEmail() : null
+                            );
                             return Mono.empty();
                         }
                     })

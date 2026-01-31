@@ -3,7 +3,6 @@ import { createSlice } from '@reduxjs/toolkit'
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
-        //on authentication will store these info in local storage
         user: JSON.parse(localStorage.getItem('user')) || null,
         token: localStorage.getItem('token') || null,
         userId: localStorage.getItem('userId') || null
