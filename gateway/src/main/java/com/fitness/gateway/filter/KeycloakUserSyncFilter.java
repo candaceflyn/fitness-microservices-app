@@ -24,6 +24,11 @@ public class KeycloakUserSyncFilter implements WebFilter {
         String userId = exchange.getRequest().getHeaders().getFirst("X-User-ID");
         String token = exchange.getRequest().getHeaders().getFirst("Authorization");
 
+        if (token == null || !token.startsWith("Bearer ")) {
+            log.error("[GATEWAY][AUTH] Invalid token = {}", token);
+            return chain.filter(exchange);
+        }
+
         RegisterRequest registerRequest = getUserDetails(token);
 
         if(userId==null){

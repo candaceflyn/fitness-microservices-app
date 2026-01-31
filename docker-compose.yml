@@ -1,0 +1,25 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: fitness-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5.2
+    container_name: fitness-keycloak
+    command: start-dev
+    ports:
+      - "8181:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+
+volumes:
+  postgres_data:
+  mongo_data:

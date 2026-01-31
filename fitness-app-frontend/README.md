@@ -1,7 +1,13 @@
 # 🔐 React Frontend – Keycloak PKCE Authentication
 
-This React frontend integrates **Keycloak** using **OAuth 2.0 Authorization Code Flow with PKCE**.
-The purpose of this setup is to validate Keycloak connectivity, perform login, and display token data before integrating backend APIs.
+This React frontend integrates **Keycloak** using **OAuth 2.0 Authorization Code Flow with PKCE**
+and serves as the user interface for the Fitness Microservices Platform.
+
+The application supports:
+- Secure login via Keycloak
+- Activity tracking
+- AI-powered fitness recommendations
+- API access via the Spring Cloud API Gateway
 
 ---
 
@@ -49,70 +55,14 @@ Redux Store + localStorage
 
 ---
 
-## ⚙️ Keycloak Setup (Required)
+## ⚠️ Keycloak Prerequisite
 
-### 1️⃣ Run Keycloak
+Keycloak must be running and configured as described in the **root project README**.
 
-```bash
-docker run -p 127.0.0.1:8181:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:26.5.2 start-dev
-```
-
-Access Admin Console:
-
-```
-http://localhost:8181
-```
-
----
-
-### 2️⃣ Create Realm
-
-```
-Realm Name: fitness-oauth2
-```
-
-Ensure **Realm Enabled = ON**
-
----
-
-### 3️⃣ Create Client (PKCE Public Client)
-
-| Setting               | Value              |
-| --------------------- | ------------------ |
-| Client ID             | oauth2-pkce-client |
-| Client Type           | OpenID Connect     |
-| Client Authentication | OFF                |
-| Standard Flow         | ENABLED            |
-| Direct Access Grants  | ENABLED            |
-
----
-
-### 4️⃣ Redirect & Origin Configuration
-
-Valid Redirect URI: ```http://localhost:5173```
-
-Web Origins: ```http://localhost:5173```
-
----
-
-### 5️⃣ Enable PKCE
-
-```
-Client → Capability Config → PKCE Method: S256
-```
-
----
-
-### 6️⃣ Create User
-
-1. Go to **Users → Create User**
-2. Set username
-3. Go to **Credentials**
-4. Set password
-5. Disable **Temporary**
-6. Save
-
-This user will be used to log in from the React app.
+Required:
+- Realm: `fitness-oauth2`
+- Client: `oauth2-pkce-client` (PKCE enabled)
+- At least one user
 
 ---
 
@@ -138,7 +88,6 @@ http://localhost:5173
 3. Redirect to Keycloak login page
 4. Login with created Keycloak user
 5. Redirect back to React app
-6. JWT token and decoded token data are displayed on screen
 
 This confirms:
 
@@ -163,13 +112,21 @@ Data is also stored in **localStorage** to persist authentication across page re
 
 ---
 
-## 🚫 Backend Dependency
+## 🔗 Backend Integration
 
-> ❗ **Backend services are NOT required at this stage**
+This frontend is now fully integrated with the backend microservices.
 
-This frontend setup:
+The React app communicates ONLY via :
 
-* Does **not** call any backend API
-* Is only validating Keycloak authentication
-* Backend integration will be added in later phases
+[API Gateway](http://localhost:8080)
 
+### APIs used:
+- `/api/activities`
+- `/api/recommendations`
+- `/api/users`
+
+Authentication:
+- Handled via **Keycloak PKCE**
+- JWT token automatically attached by Axios interceptor
+
+Backend services **must be running** for full functionality.

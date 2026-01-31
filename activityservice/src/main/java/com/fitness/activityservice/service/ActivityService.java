@@ -2,6 +2,8 @@ package com.fitness.activityservice.service;
 
 import com.fitness.activityservice.dto.ActivityRequest;
 import com.fitness.activityservice.dto.ActivityResponse;
+import com.fitness.activityservice.exception.InvalidRequestException;
+import com.fitness.activityservice.exception.ResourceNotFoundException;
 import com.fitness.activityservice.model.Activity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +31,7 @@ public class ActivityService {
     public ActivityResponse trackActivity(ActivityRequest request) {
         boolean isValidUser = userValidationService.validateUser(request.getUserId());
         if(!isValidUser)
-            throw new RuntimeException("Invalid User: "+request.getUserId());
+            throw new InvalidRequestException("Invalid User: " + request.getUserId());
 
         Activity activity = Activity.builder()
                 .userId(request.getUserId())
@@ -43,10 +45,11 @@ public class ActivityService {
         Activity savedActivity = activityRepository.save(activity);
 
         //Publish to RabbitMQ for AI processing
-        try{
+        try {
             rabbitTemplate.convertAndSend(exchange, routingKey, savedActivity);
-        } catch(Exception e){
-            log.error("Failed to publish activity to RabbitMQ : ", e);
+            log.info("[RABBITMQ] Activity published | activityId={}", savedActivity.getId());
+        } catch (Exception e) {
+            log.error("[RABBITMQ] Publish failed | activityId={}", savedActivity.getId(), e);
         }
         return mapToResponse(savedActivity);
     }
@@ -77,6 +80,6 @@ public class ActivityService {
     public ActivityResponse getActivityById(String activityId) {
         return activityRepository.findById(activityId)
                 .map(this:: mapToResponse)
-                .orElseThrow(() -> new RuntimeException("Activity not found with id : " + activityId));
+                .orElseThrow(() -> new ResourceNotFoundException("Activity not found with id : " + activityId));
     }
 }

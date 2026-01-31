@@ -1,5 +1,7 @@
 package com.fitness.gateway.user;
 
+import com.fitness.gateway.exception.InvalidRequestException;
+import com.fitness.gateway.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,10 +26,10 @@ public class UserService {
                 .bodyToMono(Boolean.class)
                 .onErrorResume(WebClientResponseException.class, e -> {
                     if (e.getStatusCode() == HttpStatus.NOT_FOUND)
-                        return Mono.error(new RuntimeException("User Not Found: " + userId));
+                        return Mono.error(new ResourceNotFoundException("User Not Found: " + userId));
                     else if (e.getStatusCode() == HttpStatus.BAD_REQUEST)
-                        return Mono.error(new RuntimeException("Invalid Request: " + userId));
-                    return Mono.error(new RuntimeException("Unexpected error: " + e.getMessage()));
+                        return Mono.error(new InvalidRequestException("Invalid Request: " + userId));
+                    return Mono.error(new Exception("Unexpected error: " + e.getMessage()));
                 });
     }
 
@@ -41,10 +43,10 @@ public class UserService {
                 .bodyToMono(UserResponse.class)
                 .onErrorResume(WebClientResponseException.class, e -> {
                     if (e.getStatusCode() == HttpStatus.BAD_REQUEST)
-                        return Mono.error(new RuntimeException("Bad Request: " + e.getMessage()));
+                        return Mono.error(new InvalidRequestException("Bad Request: " + e.getMessage()));
                     else if (e.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR)
-                        return Mono.error(new RuntimeException("Internal Server Error" + e.getMessage()));
-                    return Mono.error(new RuntimeException("Unexpected error: " + e.getMessage()));
+                        return Mono.error(new Exception("Internal Server Error" + e.getMessage()));
+                    return Mono.error(new Exception("Unexpected error: " + e.getMessage()));
                 });
     }
 }

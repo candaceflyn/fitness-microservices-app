@@ -7,6 +7,7 @@ const ActivityDetail = () => {
     const {id} = useParams();
     const [activity, setActivity] = useState(null);
     const [recommendation, setRecommendation] = useState(null);
+    const [recStatus, setRecStatus] = useState("PROCESSING");
 
     useEffect(() => {
         const fetchActivityDetail = async () => {
@@ -23,16 +24,29 @@ const ActivityDetail = () => {
     }, [id]);
 
     useEffect(() => {
-    const fetchActivityRecommendation = async () => {
-        try{
-            const response = await getActivityRecommendation(id);
-            setRecommendation(response.data);
-            console.log("DETAIL RECOMMENDATION RESPONSE:", response.data);
-        } catch (error){
-            console.error(error);
-        }
-    }
+        let timer;
+
+        const fetchActivityRecommendation = async () => {
+            try {
+                const response = await getActivityRecommendation(id);
+
+                if (response.data.status === "READY") {
+                    setRecommendation(response.data.data);
+                    setRecStatus("READY");
+                    console.log("[UI] Recommendation READY");
+                } else {
+                    console.log("[UI] Recommendation PROCESSING");
+                    setRecStatus("PROCESSING");
+                    timer = setTimeout(fetchActivityRecommendation, 3000);
+                }
+
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
         fetchActivityRecommendation();
+        return () => clearTimeout(timer);
     }, [id]);
 
     if(!activity){
@@ -50,7 +64,20 @@ const ActivityDetail = () => {
                 </CardContent>
             </Card>
 
-            {recommendation && (
+            {recStatus === "PROCESSING" && (
+                <Card>
+                    <CardContent>
+                        <Typography variant="h6">
+                            🤖 Generating AI recommendation...
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            Please wait a few seconds.
+                        </Typography>
+                    </CardContent>
+                </Card>
+            )}
+
+            {recStatus === "READY" && recommendation && (
                 <Card>
                     <CardContent>
                         <Typography variant="h5" gutterBottom>AI Recommendation</Typography>

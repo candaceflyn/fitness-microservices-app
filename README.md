@@ -12,6 +12,110 @@ This project demonstrates:
 * AI integration using **Google Gemini API**
 
 ---
+## 🔐 One-Time Authentication Setup (Required)
+
+⚠️ **This step is mandatory before running the application for the first time.**
+
+The platform uses **Keycloak (OAuth2 + PKCE)** for authentication.
+You must configure a **realm, client, and user** in Keycloak before the app can be accessed.
+
+👉 If you have already configured Keycloak for this project, you can skip this section.
+
+### Required Steps (Once)
+
+1. Ensure Keycloak is running
+2. Create Realm: `fitness-oauth2`
+3. Create Client: `oauth2-pkce-client` (PKCE enabled)
+4. Create a User and set credentials
+5. Verify issuer URI and client configuration
+
+📌 **Detailed step-by-step instructions are provided in the  
+[Authentication & Authorization (Keycloak)](#-authentication--authorization-keycloak) section below.**
+
+---
+
+## ⚡ Quick Start (TL;DR)
+
+### 🔧 Prerequisites
+
+- **Docker & Docker Compose**
+- **Java 21**
+- **Maven**
+- **Node.js 18+**
+
+---
+
+## ▶️ Start & Stop the Application (Recommended)
+
+This project provides helper scripts to start and stop the entire platform
+(infrastructure, backend services, and frontend) from a single command.
+
+### 🚀 Start Everything
+
+From the project root:
+
+```bat
+start-all.bat
+````
+
+This script will:
+
+* Start **Keycloak** and **RabbitMQ** using Docker
+* Start all Spring Boot microservices:
+
+   * Eureka Server
+   * Config Server
+   * User Service
+   * Activity Service
+   * AI Service
+   * API Gateway
+* Start the **React frontend** (`npm run dev`)
+* Wait for each service to become available before starting the next one
+
+⚠️ **Important:**
+Before running `start-all.bat`, you must configure your **Gemini API credentials**
+inside the script (see below).
+
+#### 🔑 Gemini API Configuration (Required for AI Service)
+
+The AI Service depends on the **Google Gemini API**.
+Environment variables must be set **before the AI service starts**.
+
+These variables are configured directly inside `start-all.bat`:
+
+```bat
+set GEMINI_API_URL=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=
+set GEMINI_API_KEY=YOUR_REAL_API_KEY_HERE
+````
+
+🔴 If these variables are missing or incorrect, the **AI Service will fail to start**
+with a `PlaceholderResolutionException`.
+
+👉 Generate your API key from:
+[https://aistudio.google.com/api-keys](https://aistudio.google.com/api-keys)
+
+Open:
+
+* Frontend → [http://localhost:5173](http://localhost:5173)
+* API Gateway → [http://localhost:8080](http://localhost:8080)
+
+---
+
+### 🛑 Stop Everything
+
+To stop all running services and containers:
+
+```bat
+stop-all.bat
+```
+
+This will:
+
+* Stop all Spring Boot services
+* Stop the React frontend
+* Shut down Docker containers (Keycloak, RabbitMQ)
+
+---
 
 ## 🧩 Architecture Overview
 
@@ -79,10 +183,6 @@ All external API access is secured using **JWT-based authentication**, enforced 
 ---
 
 ### 🧱 Keycloak Setup
-
-Keycloak can be run locally either by installing it on the host or using Docker.
-
-#### ▶️ Run Keycloak using Docker (Recommended)
 
 ```bash
 docker run -p 127.0.0.1:8181:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:26.5.2 start-dev

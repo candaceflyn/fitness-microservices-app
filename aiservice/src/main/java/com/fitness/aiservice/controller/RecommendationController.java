@@ -1,5 +1,6 @@
 package com.fitness.aiservice.controller;
 
+import com.fitness.aiservice.dto.RecommendationStatusResponse;
 import com.fitness.aiservice.model.Recommendation;
 import com.fitness.aiservice.service.RecommendationService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,17 @@ public class RecommendationController {
     }
 
     @GetMapping("/activity/{activityId}")
-    public ResponseEntity<Recommendation> getActivityRecommendation(@PathVariable String activityId){
-        return ResponseEntity.ok(recommendationService.getActivityRecommendation(activityId));
+    public ResponseEntity<RecommendationStatusResponse> getActivityRecommendation(
+            @PathVariable String activityId) {
+
+        return recommendationService
+                .getActivityRecommendation(activityId)
+                .map(rec -> ResponseEntity.ok(
+                        new RecommendationStatusResponse("READY", rec)
+                ))
+                .orElseGet(() -> ResponseEntity.ok(
+                        new RecommendationStatusResponse("PROCESSING", null)
+                ));
     }
+
 }
